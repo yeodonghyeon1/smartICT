@@ -1,0 +1,4 @@
+left 1번
+right 2번
+stop 4번
+stright 3번
