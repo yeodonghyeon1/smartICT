@@ -9,6 +9,8 @@ import pycocotools.mask as mask_util
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 import os
+import torchvision.transforms.v2 as transforms
+
 def plot_image_with_annotations(image, annotations):
     fig, ax = plt.subplots(1)
     ax.imshow(image)
@@ -18,6 +20,17 @@ def plot_image_with_annotations(image, annotations):
             (bbox[0], bbox[1]), bbox[2] - bbox[0], bbox[3] - bbox[1],
             linewidth=1, edgecolor='r', facecolor='none')
         ax.add_patch(rect)
+    plt.show()
+    plt.savefig('input.png')
+
+def plot_image_with_annotations2(image, annotation):
+    fig, ax = plt.subplots(1)
+    ax.imshow(image)
+    bbox = annotation # let's display [x0, y0, x1, y1]
+    rect = patches.Rectangle(
+        (bbox[0], bbox[1]), bbox[2] - bbox[0], bbox[3] - bbox[1],
+        linewidth=1, edgecolor='r', facecolor='none')
+    ax.add_patch(rect)
     plt.show()
     plt.savefig('input.png')
 
@@ -100,6 +113,15 @@ class COCODataset(Dataset):
         for ann in anns:
             ann['bbox'][2] += ann['bbox'][0]
             ann['bbox'][3] += ann['bbox'][1]
+
+
+        # Exactly the same interface as V1:
+        trans = transforms.Compose([
+            transforms.ColorJitter(contrast=0.5),
+            transforms.RandomRotation(30),
+            transforms.CenterCrop(480),
+        ])
+        argu_img, bboxes, labels = trans(img, ann['bbox'], ann['category_id'])
         # Normalize the image
         # img = torchvision.transforms.functional.normalize(img, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         
@@ -109,6 +131,8 @@ class COCODataset(Dataset):
         
         # Pad
         img = torch.nn.functional.pad(img, (0, 320 - img.shape[2], 0, 320 - img.shape[1]), value=1)
+        argu_img = torch.nn.functional.pad(argu_img, (0, 320 - argu_img.shape[2], 0, 320 - argu_img.shape[1]), value=1)
+
         
         # Category shift
         for ann in anns:
@@ -116,9 +140,10 @@ class COCODataset(Dataset):
         
         # Let's visualize our squished image and annotations to verify
         converted_image = torchvision.transforms.ToPILImage()(img)
+        converted_image2 = torchvision.transforms.ToPILImage()(argu_img)
         # print(anns)
 
-        # plot_image_with_annotations(converted_image, anns)
+        plot_image_with_annotations2(converted_image2, bboxes)
         # Finally, convert to the record format expected by the model
         anns = { 
             'boxes': torch.tensor([ann['bbox'] for ann in anns], dtype=torch.float).to(self.device),

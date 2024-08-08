@@ -4,12 +4,13 @@ import pickle # 객체의 직렬화 및 역직렬화 지원 모듈
 import cv2 # OpenCV(실시간 이미지 프로세싱) 모듈
 import predict
 import functions
+import predict_yolo
 
 # 서버 ip 주소 및 port 번호
-ip = '172.20.25.35'
+ip = '192.168.126.154'
 port = 50001
 
-# 소켓 객체 생성
+# 소켓 객체 생성000000000
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
 # 소켓 주소 정보 할당
@@ -37,7 +38,7 @@ while True:
     while len(data_buffer) < data_size:
         # 데이터 수신
         data_buffer += client_socket.recv(4096)
-    print(data_buffer)
+    # print(data_buffer)
     # 버퍼의 저장된 데이터 분할
     packed_data_size = data_buffer[:data_size]
     data_buffer = data_buffer[data_size:] 
@@ -58,7 +59,7 @@ while True:
     frame_data = data_buffer[:frame_size]
     data_buffer = data_buffer[frame_size:]
     
-    print("수신 프레임 크기 : {} bytes".format(frame_size))
+    # print("수신 프레임 크기 : {} bytes".format(frame_size0))
     
     # loads : 직렬화된 데이터를 역직렬화
     # - 역직렬화(de-serialization) : 직렬화된 파일이나 바이트 객체를 원래의 데이터로 복원하는 것
@@ -77,11 +78,24 @@ while True:
 
     # closing all open windows
     # cv2.destroyAllWindows()
-    output = predict.predict_image(frame)
-    data = output[0]['labels'][0].item()
+
+
+
+    #use tochvision model
+    # output = predict.predict_image(frame)
+    # data = output[0]['labels'][0].item()
+    # data = str(data)
+    # client_socket.sendall(data.encode('utf-8'))
+
+
+    #use yolo model
+    output = predict_yolo.predict_image(frame)
+    data = output
     data = str(data)
+    print(data)
     client_socket.sendall(data.encode('utf-8'))
-    
+
+
 
 # 소켓 닫기
 client_socket.close()

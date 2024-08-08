@@ -28,21 +28,21 @@ for i in range(0, len(img_ids)):
     width, height = img.size
     
     # Whichever is bigger, let's make it 320
-    # if width > height:
-    #     img = img.resize((320, int(320 * height / width)))
-    # else:
-    #     img = img.resize((int(320 * width / height), 320))
+    if width > height:
+        img = img.resize((320, int(320 * height / width)))
+    else:
+        img = img.resize((int(320 * width / height), 320))
     
-    # # Make image a tensor and pad it (centered)
-    # img = torchvision.transforms.ToTensor()(img)
+    # Make image a tensor and pad it (centered)
+    img = torchvision.transforms.ToTensor()(img)
         
-    # anns[i]['bbox'][0] = anns[i]['bbox'][0] * img.size(2) / width
-    # anns[i]['bbox'][1] = anns[i]['bbox'][1] * img.size(1) / height
-    # anns[i]['bbox'][2] = anns[i]['bbox'][2] * img.size(2) / width
-    # anns[i]['bbox'][3] = anns[i]['bbox'][3] * img.size(1) / height
-    # print(anns[i]['bbox'][2] * anns[i]['bbox'][3])
-    # if anns[i]['bbox'][2] * anns[i]['bbox'][3] < 500:
-    #     img_open.save(f"../dataset/size_adjust_images/{name}")
+    anns[i]['bbox'][0] = anns[i]['bbox'][0] * img.size(2) / width
+    anns[i]['bbox'][1] = anns[i]['bbox'][1] * img.size(1) / height
+    anns[i]['bbox'][2] = anns[i]['bbox'][2] * img.size(2) / width
+    anns[i]['bbox'][3] = anns[i]['bbox'][3] * img.size(1) / height
+    print(anns[i]['bbox'][2] * anns[i]['bbox'][3])
+    if anns[i]['bbox'][2] * anns[i]['bbox'][3] < 500:
+        img_open.save(f"../dataset/size_adjust_images/{name}")
 
     
     # img_open.save(f"../dataset/adjust_images/{name}")
